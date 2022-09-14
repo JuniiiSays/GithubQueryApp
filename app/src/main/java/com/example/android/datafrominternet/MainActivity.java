@@ -16,9 +16,13 @@
 package com.example.android.datafrominternet;
 
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -41,5 +45,27 @@ public class MainActivity extends AppCompatActivity {
         mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
         // Use findViewById to get a reference to mSearchResultsTextView
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results);
+    }
+
+    // Override onCreateOptionsMenu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // use getMenuInflater().inflate to inflate the menu
+        getMenuInflater().inflate(R.menu.main, menu);
+        // Return true to display your menu
+        return true;
+    }
+
+    // Override onOptionsItemSelected
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Get the ID of the item that was selected
+        int menuItemThatWasSelected = item.getItemId();
+        // If the item's ID is R.id.action_search, show a Toast and return true to tell Android that you've handled this menu click
+        if (menuItemThatWasSelected == R.id.action_search){
+            String message = "Search Clicked";
+            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+        }
+        return super.onOptionsItemSelected(item);
     }
 }

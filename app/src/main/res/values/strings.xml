@@ -15,4 +15,7 @@
   -->
 <resources>
     <string name="app_name">Github Query</string>
+
+    // String resource called search with the title "Search"
+    <string name="search">Search</string>
 </resources>
