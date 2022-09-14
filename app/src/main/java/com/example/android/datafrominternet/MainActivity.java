@@ -15,10 +15,14 @@
  */
 package com.example.android.datafrominternet;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,11 +37,15 @@ import java.net.URL;
 public class MainActivity extends AppCompatActivity {
 
     // Create an EditText variable called mSearchBoxEditText
-    EditText mSearchBoxEditText;
+    private EditText mSearchBoxEditText;
     // Create a TextView variable called mUrlDisplayTextView
-    TextView mUrlDisplayTextView;
+    private TextView mUrlDisplayTextView;
     // Create a TextView variable called mSearchResultsTextView
-    TextView mSearchResultsTextView;
+    private TextView mSearchResultsTextView;
+    // Create a variable to store a reference to the error message TextView
+    private TextView mErrorMessageDisplay;
+    // Create a ProgressBar variable to store a reference to the ProgressBar
+    private ProgressBar mLoadingIndicator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,7 +57,11 @@ public class MainActivity extends AppCompatActivity {
         // Use findViewById to get a reference to mUrlDisplayTextView
         mUrlDisplayTextView = (TextView) findViewById(R.id.tv_url_display);
         // Use findViewById to get a reference to mSearchResultsTextView
-        mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results);
+        mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results_json);
+        //
+        mErrorMessageDisplay = (TextView) findViewById(R.id.tv_error_message_display);
+        //
+        mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
     }
 
     // Create a method called makeGithubSearchQuery
@@ -60,14 +72,60 @@ public class MainActivity extends AppCompatActivity {
         URL githubSearchUrl = NetworkUtils.buildUrl(githubQuery);
         // Show the created Url in the TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
-        // Call getResponseFromHttpUrl and display the results in mSearchResultsTextView
-        String githubSearchResults = null;
-        // Surround the call to getResponseFromHttpUrl with a try / catch block to catch an IOException
-        try {
-            githubSearchResults = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
-            mSearchResultsTextView.setText(githubSearchResults);
-        } catch (IOException e) {
-            e.printStackTrace();
+        // Create a new GithubQueryTask and call its execute method, passing in the url to query
+        new GithubQueryTask().execute(githubSearchUrl);
+    }
+
+    // Create a method called showJsonDataView to show the data and hide the error
+    private void showJsonDataView(){
+        // First, make sure the error is invisible
+        mErrorMessageDisplay.setVisibility(View.INVISIBLE);
+        // Then, make sure the JSON data is visible
+        mSearchResultsTextView.setVisibility(View.VISIBLE);
+    }
+
+    private void showErrorMessage() {
+        // First, hide the currently visible data
+        mSearchResultsTextView.setVisibility(View.INVISIBLE);
+        // Then, show the error
+        mErrorMessageDisplay.setVisibility(View.VISIBLE);
+    }
+
+    // Create a class called GithubQueryTask that extends AsyncTask<URL, Void, String>
+    public class GithubQueryTask extends AsyncTask<URL, Void, String>{
+
+        //Override onPreExecute to set the loading indicator to visible
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            mLoadingIndicator.setVisibility(View.VISIBLE);
+        }
+
+        //Override the doInBackground method to perform the query. Return the results.
+        @Override
+        protected String doInBackground(URL... urls) {
+            URL searchUrl = urls[0];
+            String githubSearchResults = null;
+            try {
+                githubSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            return githubSearchResults;
+        }
+        // Override onPostExecute to display the results in the TextView
+        @Override
+        protected void onPostExecute(String githubSearchResults) {
+            // As soon as the loading is complete, hide the loading indicator
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (githubSearchResults != null && !githubSearchResults.equals("")) {
+                // Call showJsonDataView if we have valid, non-null results
+                showJsonDataView();
+                mSearchResultsTextView.setText(githubSearchResults);
+            } else {
+                // Call showErrorMessage if the result is null in onPostExecute
+                showErrorMessage();
+            }
         }
     }
 
