@@ -27,6 +27,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
+import java.io.IOException;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity {
@@ -52,13 +53,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Create a method called makeGithubSearchQuery
-    void makeGithubSearchQuery(){
+    void makeGithubSearchQuery() {
         // Get Input from Search Box
         String githubQuery = mSearchBoxEditText.getText().toString();
         // Call the buildUrl method of NetworkUtils to create the URL
         URL githubSearchUrl = NetworkUtils.buildUrl(githubQuery);
         // Show the created Url in the TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
+        // Call getResponseFromHttpUrl and display the results in mSearchResultsTextView
+        String githubSearchResults = null;
+        // Surround the call to getResponseFromHttpUrl with a try / catch block to catch an IOException
+        try {
+            githubSearchResults = NetworkUtils.getResponseFromHttpUrl(githubSearchUrl);
+            mSearchResultsTextView.setText(githubSearchResults);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Override onCreateOptionsMenu
