@@ -25,6 +25,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.example.android.datafrominternet.utilities.NetworkUtils;
+
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity {
 
     // Create an EditText variable called mSearchBoxEditText
@@ -47,6 +51,16 @@ public class MainActivity extends AppCompatActivity {
         mSearchResultsTextView = (TextView) findViewById(R.id.tv_github_search_results);
     }
 
+    // Create a method called makeGithubSearchQuery
+    void makeGithubSearchQuery(){
+        // Get Input from Search Box
+        String githubQuery = mSearchBoxEditText.getText().toString();
+        // Call the buildUrl method of NetworkUtils to create the URL
+        URL githubSearchUrl = NetworkUtils.buildUrl(githubQuery);
+        // Show the created Url in the TextView
+        mUrlDisplayTextView.setText(githubSearchUrl.toString());
+    }
+
     // Override onCreateOptionsMenu
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,8 +77,8 @@ public class MainActivity extends AppCompatActivity {
         int menuItemThatWasSelected = item.getItemId();
         // If the item's ID is R.id.action_search, show a Toast and return true to tell Android that you've handled this menu click
         if (menuItemThatWasSelected == R.id.action_search){
-            String message = "Search Clicked";
-            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+            makeGithubSearchQuery();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
