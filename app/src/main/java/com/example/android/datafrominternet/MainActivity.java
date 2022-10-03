@@ -230,6 +230,17 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
 
+        // As soon as the loading is complete, hide the loading indicator
+        mLoadingIndicator.setVisibility(View.INVISIBLE);
+        if (data != null && !data.equals("")) {
+            // Call showJsonDataView if we have valid, non-null results
+            showJsonDataView();
+            mSearchResultsTextView.setText(data);
+        } else {
+            // Call showErrorMessage if the result is null in onPostExecute
+            showErrorMessage();
+        }
+
     }
 
     @Override
