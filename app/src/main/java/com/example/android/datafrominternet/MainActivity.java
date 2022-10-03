@@ -45,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     // T05b.01 COMPLETED (2) Create a static final key to store the search's raw JSON
     public static final String SEARCH_RESULTS_RAW_JSON = "results";
 
+    // TODO (2) Create a constant int to uniquely identify your loader. Call it GITHUB_SEARCH_LOADER
+    public static final int GITHUB_SEARCH_LOADER = 22;
+
     // Create an EditText variable called mSearchBoxEditText
     private EditText mSearchBoxEditText;
     // Create a TextView variable called mUrlDisplayTextView
@@ -92,7 +95,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Show the created Url in the TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
         // Create a new GithubQueryTask and call its execute method, passing in the url to query
-        new GithubQueryTask().execute(githubSearchUrl);
+        // TODO (18) Remove the call to execute the AsyncTask
+
+        Bundle queryBundle = new Bundle();
+        queryBundle.putString(SEARCH_QUERY_URL_EXTRA, githubSearchUrl.toString());
     }
 
     // Create a method called showJsonDataView to show the data and hide the error
