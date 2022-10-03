@@ -39,7 +39,7 @@ import com.example.android.datafrominternet.utilities.NetworkUtils;
 import java.io.IOException;
 import java.net.URL;
 
-// TODO (1) implement LoaderManager.LoaderCallbacks<String> on MainActivity
+// T05b.02 COMPLETED (1) implement LoaderManager.LoaderCallbacks<String> on MainActivity
 public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     // T05b.01 COMPLETED (1) Create a static final key to store the query's URL
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
     // T05b.01 COMPLETED (2) Create a static final key to store the search's raw JSON
     public static final String SEARCH_RESULTS_RAW_JSON = "results";
 
-    // TODO (2) Create a constant int to uniquely identify your loader. Call it GITHUB_SEARCH_LOADER
+    // T05b.02 COMPLETED (2) Create a constant int to uniquely identify your loader. Call it GITHUB_SEARCH_LOADER
     public static final int GITHUB_SEARCH_LOADER = 22;
 
     // Create an EditText variable called mSearchBoxEditText
@@ -80,11 +80,10 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // T05b.01 COMPLETED (9) If the savedInstanceState bundle is not null, set the text of the URL and search results TextView respectively
         if (savedInstanceState != null){
             String queryUrl = savedInstanceState.getString(SEARCH_QUERY_URL_EXTRA);
-            String rawJsonSearchResults = savedInstanceState.getString(SEARCH_RESULTS_RAW_JSON);
 
-            mUrlDisplayTextView.setText(queryUrl);
-            mSearchResultsTextView.setText(rawJsonSearchResults);
         }
+
+        getSupportLoaderManager().initLoader(GITHUB_SEARCH_LOADER, null, this);
 
     }
 
@@ -93,14 +92,29 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // Get Input from Search Box
         String githubQuery = mSearchBoxEditText.getText().toString();
         // Call the buildUrl method of NetworkUtils to create the URL
+
+        if (TextUtils.isEmpty(githubQuery)) {
+            mUrlDisplayTextView.setText("No query entered, nothing to search for.");
+            return;
+        }
+
         URL githubSearchUrl = NetworkUtils.buildUrl(githubQuery);
         // Show the created Url in the TextView
         mUrlDisplayTextView.setText(githubSearchUrl.toString());
         // Create a new GithubQueryTask and call its execute method, passing in the url to query
-        // TODO (18) Remove the call to execute the AsyncTask
+        // T05b.02 COMPLETED (18) Remove the call to execute the AsyncTask
 
         Bundle queryBundle = new Bundle();
         queryBundle.putString(SEARCH_QUERY_URL_EXTRA, githubSearchUrl.toString());
+
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> githubSearchLoader = loaderManager.getLoader(GITHUB_SEARCH_LOADER);
+
+        if (githubSearchLoader == null){
+            loaderManager.initLoader(GITHUB_SEARCH_LOADER, queryBundle, this);
+        } else {
+            loaderManager.restartLoader(GITHUB_SEARCH_LOADER, queryBundle, this);
+        }
     }
 
     // Create a method called showJsonDataView to show the data and hide the error
@@ -118,43 +132,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         mErrorMessageDisplay.setVisibility(View.VISIBLE);
     }
 
-    // Create a class called GithubQueryTask that extends AsyncTask<URL, Void, String>
-    public class GithubQueryTask extends AsyncTask<URL, Void, String>{
 
-        //Override onPreExecute to set the loading indicator to visible
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-
-        }
-
-        //Override the doInBackground method to perform the query. Return the results.
-        @Override
-        protected String doInBackground(URL... urls) {
-            URL searchUrl = urls[0];
-            String githubSearchResults = null;
-            try {
-                githubSearchResults = NetworkUtils.getResponseFromHttpUrl(searchUrl);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            return githubSearchResults;
-        }
-        // Override onPostExecute to display the results in the TextView
-        @Override
-        protected void onPostExecute(String githubSearchResults) {
-            // As soon as the loading is complete, hide the loading indicator
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            if (githubSearchResults != null && !githubSearchResults.equals("")) {
-                // Call showJsonDataView if we have valid, non-null results
-                showJsonDataView();
-                mSearchResultsTextView.setText(githubSearchResults);
-            } else {
-                // Call showErrorMessage if the result is null in onPostExecute
-                showErrorMessage();
-            }
-        }
-    }
 
     // Override onCreateOptionsMenu
     @Override
@@ -190,9 +168,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         // T05b.01 COMPLETED (6) Using the key for the query URL, put the string in the outState Bundle
         outState.putString(SEARCH_QUERY_URL_EXTRA, queryUrl);
         // T05b.01 COMPLETED (7) Put the contents of the TextView that contains our raw JSON search results into a variable
-        String rawJsonSearchResult = mSearchResultsTextView.getText().toString();
-        // T05b.01 COMPLETED (8) Using the key for the raw JSON search results, put the search results into the outState Bundle
-        outState.putString(SEARCH_RESULTS_RAW_JSON, rawJsonSearchResult);
+
     }
 
     @NonNull
@@ -207,13 +183,15 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
                     return;
                 }
                 mLoadingIndicator.setVisibility(View.VISIBLE);
+                // COMPLETED (8) Force a load
+                forceLoad();
             }
 
             @Nullable
             @Override
             public String loadInBackground() {
                 String searchQueryUrlString = args.getString(SEARCH_QUERY_URL_EXTRA);
-                if (searchQueryUrlString != null || TextUtils.isEmpty(searchQueryUrlString)){
+                if (TextUtils.isEmpty(searchQueryUrlString)){
                     return null;
                 }
                 try {
