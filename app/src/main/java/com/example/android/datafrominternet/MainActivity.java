@@ -27,14 +27,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.loader.app.LoaderManager;
+import androidx.loader.content.Loader;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity {
+// TODO (1) implement LoaderManager.LoaderCallbacks<String> on MainActivity
+public class MainActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     // T05b.01 COMPLETED (1) Create a static final key to store the query's URL
     public static final String SEARCH_QUERY_URL_EXTRA = "query";
@@ -181,6 +185,22 @@ public class MainActivity extends AppCompatActivity {
         String rawJsonSearchResult = mSearchResultsTextView.getText().toString();
         // T05b.01 COMPLETED (8) Using the key for the raw JSON search results, put the search results into the outState Bundle
         outState.putString(SEARCH_RESULTS_RAW_JSON, rawJsonSearchResult);
+    }
+
+    @NonNull
+    @Override
+    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+
     }
 
 
