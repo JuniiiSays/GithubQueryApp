@@ -18,6 +18,7 @@ package com.example.android.datafrominternet;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,6 +31,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.loader.app.LoaderManager;
+import androidx.loader.content.AsyncTaskLoader;
 import androidx.loader.content.Loader;
 
 import com.example.android.datafrominternet.utilities.NetworkUtils;
@@ -123,7 +125,7 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mLoadingIndicator.setVisibility(View.VISIBLE);
+
         }
 
         //Override the doInBackground method to perform the query. Return the results.
@@ -195,8 +197,34 @@ public class MainActivity extends AppCompatActivity implements LoaderManager.Loa
 
     @NonNull
     @Override
-    public Loader<String> onCreateLoader(int id, @Nullable Bundle args) {
-        return null;
+    public Loader<String> onCreateLoader(int id, @Nullable final Bundle args) {
+        return new AsyncTaskLoader<String>(this) {
+
+            @Override
+            protected void onStartLoading() {
+                super.onStartLoading();
+                if (args == null){
+                    return;
+                }
+                mLoadingIndicator.setVisibility(View.VISIBLE);
+            }
+
+            @Nullable
+            @Override
+            public String loadInBackground() {
+                String searchQueryUrlString = args.getString(SEARCH_QUERY_URL_EXTRA);
+                if (searchQueryUrlString != null || TextUtils.isEmpty(searchQueryUrlString)){
+                    return null;
+                }
+                try {
+                    URL githubUrl = new URL(searchQueryUrlString);
+                    return NetworkUtils.getResponseFromHttpUrl(githubUrl);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
+            }
+        };
     }
 
     @Override
